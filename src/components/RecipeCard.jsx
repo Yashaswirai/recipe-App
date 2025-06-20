@@ -1,7 +1,33 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
+import { dataContext } from "../context/RecepiContext";
+import { toast } from "react-toastify";
 
 const RecipeCard = ({ recepie }) => {
+  const { data, setData } = useContext(dataContext);
+  const [isFavorite, setIsFavorite] = useState(recepie?.favorite || false);
+
+  const toggleFavorite = (e) => {
+    e.preventDefault(); // Prevent navigation when clicking heart
+    e.stopPropagation();
+
+    const newFavoriteStatus = !isFavorite;
+    setIsFavorite(newFavoriteStatus);
+
+    // Update the recipe in the data array
+    const index = data.findIndex((recipe) => recipe.id === recepie.id);
+    if (index !== -1) {
+      const copyData = [...data];
+      copyData[index] = { ...copyData[index], favorite: newFavoriteStatus };
+      setData(copyData);
+
+      toast.success(
+        newFavoriteStatus
+          ? "Recipe added to favorites! ❤️"
+          : "Recipe removed from favorites"
+      );
+    }
+  };
   return (
     <Link to={`/Recepies/details/${recepie.id}`}>
       <div className="relative overflow-hidden">
@@ -10,7 +36,30 @@ const RecipeCard = ({ recepie }) => {
           alt={recepie.name}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex items-center space-x-2">
+          <button
+            onClick={toggleFavorite}
+            className={`p-2 rounded-full transition-all duration-200 transform hover:scale-110 ${
+              isFavorite
+                ? 'bg-red-500/90 text-white shadow-lg'
+                : 'bg-black/50 text-white hover:bg-red-500/70'
+            }`}
+          >
+            <svg
+              className={`w-4 h-4 transition-all duration-200 ${
+                isFavorite ? 'fill-current' : 'fill-none'
+              }`}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          </button>
           <span
             className={`px-3 py-1 rounded-full text-xs font-semibold ${
               recepie.type === "veg"

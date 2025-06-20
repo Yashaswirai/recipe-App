@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { dataContext } from '../context/RecepiContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -11,7 +11,29 @@ const SingleRecipe = () => {
   const recepie = data.find((recepie)=>recepie.id===params.id);
   const {register,handleSubmit,formState:{errors}}=useForm({defaultValues:recepie});
 
-  const submitHandler = (recepie) => {
+  // Initialize favorite state - check if recipe has favorite property, default to false
+  const [isFavorite, setIsFavorite] = useState(recepie?.favorite || false);
+
+  const toggleFavorite = () => {
+    const newFavoriteStatus = !isFavorite;
+    setIsFavorite(newFavoriteStatus);
+
+    // Update the recipe in the data array
+    const index = data.findIndex((recipe) => recipe.id === params.id);
+    if (index !== -1) {
+      const copyData = [...data];
+      copyData[index] = { ...copyData[index], favorite: newFavoriteStatus };
+      setData(copyData);
+
+      toast.success(
+        newFavoriteStatus
+          ? "Recipe added to favorites! ❤️"
+          : "Recipe removed from favorites"
+      );
+    }
+  };
+
+  const updateHandler = (recepie) => {
     const index = data.findIndex((recepie)=>recepie.id===params.id);
 
     const copyData=[...data];
@@ -68,6 +90,34 @@ const SingleRecipe = () => {
                       <p className="text-sm text-gray-400">Created by</p>
                       <p className="text-lg font-semibold text-white">Chef {recepie.chef}</p>
                     </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={toggleFavorite}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-200 transform hover:scale-105 ${
+                        isFavorite
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30'
+                          : 'bg-gray-700/50 text-gray-400 border border-gray-600 hover:bg-gray-600/50 hover:text-red-400'
+                      }`}
+                    >
+                      <svg
+                        className={`w-5 h-5 transition-all duration-200 ${
+                          isFavorite ? 'fill-current' : 'fill-none'
+                        }`}
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
+                      </svg>
+                      <span className="text-sm font-medium">
+                        {isFavorite ? 'Favorited' : 'Add to Favorites'}
+                      </span>
+                    </button>
                   </div>
                 </div>
 
@@ -129,7 +179,7 @@ const SingleRecipe = () => {
         </div>
 
         <div className="bg-gray-800 border border-gray-700 rounded-2xl shadow-xl p-8 sm:p-12">
-          <form className="space-y-8" onSubmit={handleSubmit(submitHandler)}>
+          <form className="space-y-8" onSubmit={handleSubmit(updateHandler)}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Recipe Name */}
               <div className="lg:col-span-2">

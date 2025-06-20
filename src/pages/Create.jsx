@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 import { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { dataContext } from "../context/RecepiContext";
+import { toast } from "react-toastify";
 
 const Create = () => {
   const {data,setData} = useContext(dataContext);
@@ -14,6 +15,7 @@ const Create = () => {
   const submitHandler = (recepie) => {
     recepie.id=nanoid();
     setData([...data,recepie]);
+    toast.success("Recepie created successfully");
     reset();
   };
   return (
