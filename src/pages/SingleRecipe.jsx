@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { dataContext } from '../context/RecepiContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -10,7 +10,11 @@ const SingleRecipe = () => {
   const params = useParams();
   const recepie = data.find((recepie)=>recepie.id===params.id);
   const {register,handleSubmit,formState:{errors}}=useForm({defaultValues:recepie});
-
+  useEffect(()=>{
+    if(!recepie){
+      navigate("/Recepies");
+    }
+  },[])
   // Initialize favorite state - check if recipe has favorite property, default to false
   const [isFavorite, setIsFavorite] = useState(recepie?.favorite || false);
 
